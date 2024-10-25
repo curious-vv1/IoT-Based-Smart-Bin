@@ -54,10 +54,6 @@ bool verifyUltrasonicSensor(int trigPin, int echoPin) {
 
 // Function to verify servo connection
 bool verifyServo() {
-  myservo.write(0);
-  delay(500);
-  myservo.write(10);
-  delay(500);
   return myservo.attached();
 }
 

@@ -1,52 +1,75 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const BinCard = ({ binData, binId }) => {
-  const [isPowerOn, setIsPowerOn] = useState(binData.status === 'On');
+const BinCard = ({ binData, binId, onUpdateBin }) => {
+  const [isActive, setIsActive] = useState(binData.status);
   const [binHeight, setBinHeight] = useState(binData.binHeight || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempBinHeight, setTempBinHeight] = useState(binData.binHeight || '');
   const binFilledPercentage = parseInt(binData.binFilled);
 
   const getBinFilledColor = () => {
-    if (binFilledPercentage < 50) return 'text-green-500';
-    if (binFilledPercentage < 80) return 'text-yellow-500';
-    return 'text-red-500';
+    if (binFilledPercentage < 50) return 'bg-green-500';
+    if (binFilledPercentage < 80) return 'bg-yellow-500';
+    return 'bg-red-500';
   };
 
-  const handlePowerToggle = () => {
-    setIsPowerOn(!isPowerOn);
+  const handleStatusToggle = async () => {
+    const newStatus = !isActive;
+    setIsActive(newStatus);
+    await onUpdateBin(binId, { status: newStatus });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setTempBinHeight(binData.binHeight || '');
+  };
+
+  const handleSave = async () => {
+    await onUpdateBin(binId, { binHeight: tempBinHeight });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setTempBinHeight(binData.binHeight || '');
   };
 
   const handleBinHeightChange = (e) => {
-    setBinHeight(e.target.value);
-  };
-
-  const handleSave = () => {
-    // Here you would typically save the binHeight to your backend
-    console.log(`Saving bin height for ${binId}: ${binHeight}`);
+    setTempBinHeight(e.target.value);
   };
 
   return (
     <div className="w-full p-4">
-      <div className={`bg-white border ${isPowerOn ? 'border-green-200' : 'border-red-200'} p-6 rounded-xl shadow-lg`}>
+      <div className={`bg-white border ${isActive ? 'border-green-200' : 'border-red-200'} p-6 rounded-xl shadow-lg`}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-3xl font-semibold text-gray-800">{binId}</h2>
           <label className="flex items-center cursor-pointer">
             <div className="relative">
-              <input type="checkbox" className="sr-only" checked={isPowerOn} onChange={handlePowerToggle} />
+              <input type="checkbox" className="sr-only" checked={isActive} onChange={handleStatusToggle} />
               <div className="w-14 h-7 bg-gray-400 rounded-full shadow-inner"></div>
-              <div className={`absolute w-9 h-9 rounded-full shadow -left-1 -top-1 transition ${isPowerOn ? 'bg-green-500 transform translate-x-full' : 'bg-red-500'}`}></div>
+              <div className={`absolute w-9 h-9 rounded-full shadow -left-1 -top-1 transition ${isActive ? 'bg-green-500 transform translate-x-full' : 'bg-red-500'}`}></div>
             </div>
             <div className="ml-3 text-gray-700 font-medium text-lg">
-              {isPowerOn ? 'On' : 'Off'}
+              {isActive ? 'Active' : 'Inactive'}
             </div>
           </label>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-4">
-          <div className="text-gray-600">
-            <p className="font-medium">Bin Filled:</p>
-            <p className={getBinFilledColor()}>{binData.binFilled}</p>
+        <div className="grid grid-cols-2 gap-6 mb-4">
+          <div className="text-gray-600 col-span-2">
+            <p className="font-medium mb-2">Bin Filled:</p>
+            <div className="w-full bg-gray-200 rounded-full h-6 dark:bg-gray-200">
+              <div 
+                className={`h-6 rounded-full ${getBinFilledColor()} transition-all duration-300 ease-in-out`} 
+                style={{width: `${binFilledPercentage}%`}}
+              >
+                <span className="flex items-center justify-center h-full text-white text-sm font-semibold">
+                  {binFilledPercentage}%
+                </span>
+              </div>
+            </div>
           </div>
           <div className="text-gray-600">
             <p className="font-medium">Bin Lid Sensor:</p>
@@ -61,37 +84,43 @@ const BinCard = ({ binData, binId }) => {
             <p>{binData.lid}</p>
           </div>
           <div className="text-gray-600">
-            <p className="font-medium">Lid Distance:</p>
-            <p>{binData.lidDistance}</p>
-          </div>
-          <div className="text-gray-600">
-            <p className="font-medium">Servo:</p>
-            <p>{binData.servo}</p>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <label htmlFor="binHeight" className="block text-sm font-medium text-gray-700 mb-1">
-            Bin Height
-          </label>
-          <div className="flex rounded-md shadow-sm max-w-xs">
-            <input
-              type="number"
-              name="binHeight"
-              id="binHeight"
-              className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
-              placeholder="Enter bin height"
-              value={binHeight}
-              onChange={handleBinHeightChange}
-            />
-            <button
-              type="button"
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              onClick={handleSave}
-            >
-              <FontAwesomeIcon icon={faSave} className="mr-2" />
-              Save
-            </button>
+            <p className="font-medium">Bin Height:</p>
+            {isEditing ? (
+              <div className="flex items-center">
+                <input
+                  type="number"
+                  value={tempBinHeight}
+                  onChange={handleBinHeightChange}
+                  className="w-20 px-2 py-1 mr-2 border rounded"
+                  placeholder="Enter height"
+                />
+                <button
+                  onClick={handleSave}
+                  className="p-1 text-green-600 hover:text-green-800"
+                  title="Save"
+                >
+                  <FontAwesomeIcon icon={faSave} />
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="p-1 text-red-600 hover:text-red-800"
+                  title="Cancel"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <p>{binData.binHeight}</p>
+                <button
+                  onClick={handleEdit}
+                  className="ml-2 p-1 text-blue-600 hover:text-blue-800"
+                  title="Edit"
+                >
+                  <FontAwesomeIcon icon={faEdit} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
