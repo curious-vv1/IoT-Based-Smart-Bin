@@ -57,7 +57,7 @@ void loop() {
     isMeasurementPaused = true;
     measurementPauseTime = millis();
     // Start the servo movement sequence
-    myservo.write(180);
+    myservo.write(90);
     delay(2000);
     myservo.write(0);
     delay(2000);
