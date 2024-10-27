@@ -110,10 +110,4 @@ https://github.com/user-attachments/assets/99108cda-3056-4b40-88b4-1f4dc9fa7f96
 
 Feel free to fork this project and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
 
-## 📝 License
 
-[Your chosen license]
-
-## 👥 Contact
-
-[Your contact information]
