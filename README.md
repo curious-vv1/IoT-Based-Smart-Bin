@@ -5,7 +5,8 @@ A smart waste management solution that combines hardware automation with real-ti
 ![Smart Bin Dashboard](Readme-files/smart-bin.png)
 
 ## 🎥 Demo Video
-![Watch the demo video](/Readme-files/Smart-Bin-comp.mp4) showcasing the Smart Bin in action!
+<video src="https://github.com/curious-vv1/IoT-Based-Smart-Bin/blob/main/Readme-files/Smart-Bin-comp.mp4" controls="controls" style="max-width: 730px;">
+</video>
 
 ## ✨ Features
 
